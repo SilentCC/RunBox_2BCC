@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -78,7 +78,7 @@ function utcToDate(utcCurrTime) {
 var Top=55;//全局变量
 var myDate=new Date();//全局变量时间
 var time=utcToDate(myDate);//全局变量
-var ulh=30;//ul的高度
+var ulh=0;//ul的高度
 
 var Purl=[];//遗留的视频图片
 var Pname=[];
@@ -95,9 +95,13 @@ function loadData(){
 	var type=[];
 	var content=[];
 	var createtime=[];
+	//time="2017-3-24 10:23:24"
+	//alert(time);
 
+	var tag=0;
 	$.getJSON("http://bc.runbros.com/api/card/getCard.php?time="+time,function(data){
 
+				//alert("ok");
 				var now;//最后一个图片创建的时间
 				$.each(data.card,function(i,term){
 					//alert(term.cimg);
@@ -108,10 +112,13 @@ function loadData(){
 					content.push(term.ccontent);
 					createtime.push(term.ccreatetime);
 					time=term.ccreatetime;
+						//alert(time);
+						tag=1;
+						//alert(tag);
 				});
+
 				var len=url.length;
-				if(len==0)
-						$("#mess").show();
+
 				for(var i=0;i<len;i++){
 
 					//如果是横版的话
@@ -129,7 +136,7 @@ function loadData(){
 								html+="</div>";
 								html+="</div></li>";
 								$("#uli").append(html);
-								ulh+=240;
+								ulh+=250;
 								$("#uli").height(ulh);
 								Top+=250;
 						}
@@ -161,7 +168,7 @@ function loadData(){
 										html+="</div>";
 										html+="</div>";
 										html+="</div></li>";
-										$("#uli").append(html);
+											$("#uli").append(html);
 										ttop--;
 
 										var html="<li style='position:absolute;height:240px;width:180px;top:"+Top+"px;left:155px'><div class='col-md-4'>";
@@ -177,19 +184,38 @@ function loadData(){
 												html+="</div></li>";
 										$("#uli").append(html);
 
-										ulh+=240;
+										ulh+=250;
 										$("#uli").height(ulh);
 										Top+=250;
 									}
 						}
 				}
 
+
+
 			});
+			//如果有某个时间点不能正常获取数据，就跳过这一天
+			setTimeout(function(){
+				//alert(tag);
+				if(tag==0){
 
 
-}
+				var time2=time.split(" ");
+				var time3=time2[0].split("-");
+				time3[2]=time3[2]-1;
+				time=time3[0]+"-"+time3[1]+"-"+time3[2]+" "+time2[1];
+				//alert(time);
+			}
+
+		},1000);
+
+		}
+
+
+
+
 window.onload=function(){
-	$("#mess").hide();
+	//$("#mess").hide();
 	loadData();
 }
 window.onresize = function(){
@@ -204,35 +230,19 @@ refresher.init({
 var generatedCount = 0;
 function Refresh() {
 	setTimeout(function () {	// <-- Simulate network congestion, remove setTimeout from production!
-		/*var el, li, i;
-		el =document.querySelector("#wrapper ul");
-		el.innerHTML='';
-		for (i=0; i<11; i++) {
-			li = document.createElement('li');
-			li.appendChild(document.createTextNode('async row ' + (++generatedCount)));
-			el.insertBefore(li, el.childNodes[0]);
-		}*/
 		 loadData();
 		wrapper.refresh();/****remember to refresh after  action completed！ ---yourId.refresh(); ----| ****/
 
-	}, 200);
+	}, 500);
 
 }
 
 function Load() {
+
 	setTimeout(function () {// <-- Simulate network congestion, remove setTimeout from production!
-		//var el, li, i;
-		//el =document.querySelector("#wrapper ul");
-	/*	for (i=0; i<2; i++) {
-			li = document.createElement('li');
-			li.appendChild(document.createTextNode('async row ' + (++generatedCount)));
-			el.appendChild(li, el.childNodes[0]);
-		}*/
 		loadData();
 		wrapper.refresh();/****rem写ember to refresh after action completed！！！   ---id.refresh(); --- ****/
-		//for(var i=0;i<document.querySelectorAll("#wrapper ul li").length;i++){
-		//document.querySelectorAll("#wrapper ul li")[i].colorfulBg(); }
-	}, 200);
+	}, 500);
 }
 </script>
 
