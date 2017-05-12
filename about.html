@@ -87,162 +87,179 @@ var Ptype=[];
 var Pcontent=[];
 var Pcreatetime=[];
 
-var ttop=0;//指针
-function loadData(){
-	var url=[];//小版的视频图片
-	var name=[];
-	var title=[];
-	var type=[];
-	var content=[];
-	var createtime=[];
-	//time="2017-3-24 10:23:24"
-	//alert(time);
 
+var url=[];//小版的视频图片
+var nname=[];
+var title=[];
+var type=[];
+var content=[];
+var createtime=[];
+
+var ttop=0;//指针
+
+//布局函数
+function layout(){
+
+	var len=url.length;
+	for(var i=0;i<len;i++){
+		//如果是横版的话
+		if(type[i]==2){
+			var html="<li style='position:absolute;height:240px;width:340px;top:"+Top+"px;left:-5px'><div class='col-md-4'>";
+					html+="<div class='card card-blog'>"
+					html+="<div class='card-image'>";
+					html+="<a href='#'> <img class='img img-raised' style='height:180px;width:280px' src='"+url[i]+"'> </a>";
+					html+="<div class='ripple-cont'></div>";
+					html+="</div>";
+					html+="<div class='table'>";
+					html+="<div style='height:20px;overflow:hidden'><a style='font-size:2px'>"+nname[i]+"</a></div>";
+					html+="</div>";
+					html+="</div>";
+					html+="</div></li>";
+					$("#uli").append(html);
+					ulh+=245;
+					$("#uli").height(ulh);
+					Top+=245;
+			}
+			//如果是竖版
+			if(type[i]==1){
+				//如果栈里没有元素就压栈
+				if(ttop==0){
+						//alert(ttop);
+					Purl[++ttop]=url[i];
+					Pname[ttop]=nname[i];
+					Ptitle[ttop]=title[i];
+					Ptype[ttop]=type[i];
+					Pcontent[ttop]=content[i];
+					Pcreatetime[ttop]=createtime[i];
+				}
+				//否则，就和栈里的元素一起出栈，排成一排
+				else{
+
+					var html="<li  style='position:absolute;height:240px;width:180px;top:"+Top+"px;left:-5px'><div class='col-md-4' >";
+							html+="<div class='card card-blog'>";
+							html+="<div class='card-image'>";
+							html+="<a href='#'> <img class='img img-raised'  style='height:180px;width:140px' src='"+Purl[ttop]+"'> </a>";
+							html+="<div class='ripple-cont'></div>";
+							html+="</div>";
+							html+="<div class='table'>";
+							html+="<div style='height:20px;overflow:hidden'><a style='font-size:6px !important;}'>"+Pname[ttop]+"</a><br/>";
+							html+="<a style='font-size:4px !important;>"+Ptitle[ttop]+"</a><br/><a style='font-size:2px !important;>"+Pcontent[ttop]+"</div>";
+							html+="</div>";
+							html+="</div>";
+							html+="</div></li>";
+								$("#uli").append(html);
+							ttop--;
+
+							var html="<li style='position:absolute;height:240px;width:180px;top:"+Top+"px;left:155px'><div class='col-md-4'>";
+									html+="<div class='card card-blog'>"
+									html+="<div class='card-image'>";
+									html+="<a href='#'> <img class='img img-raised' style='height:180px;width:140px' src='"+url[i]+"'> </a>";
+									html+="<div class='ripple-cont'></div>";
+									html+="</div>";
+									html+="<div class='table'>";
+									html+="<div style='height:20px;overflow:hidden'><a style='font-size:2px'>"+nname[i]+"</a></div>";
+									html+="</div>";
+									html+="</div>";
+									html+="</div></li>";
+							$("#uli").append(html);
+							ulh+=245;
+							$("#uli").height(ulh);
+							Top+=245;
+						}
+			}
+	}
+}
+function loadData(){
 	var tag=0;
 	$.getJSON("http://bc.runbros.com/api/card/getCard.php?time="+time,function(data){
+			//初始化
+			 url=[];nname=[];title=[];
+			 type=[];content=[];createtime=[];
 
-				//alert("ok");
-				var now;//最后一个图片创建的时间
 				$.each(data.card,function(i,term){
 					//alert(term.cimg);
 					url.push(term.cimg);
-					name.push(term.cname);
+					nname.push(term.cname);
 					title.push(term.ctitle);
 					type.push(term.ccardtype);
 					content.push(term.ccontent);
 					createtime.push(term.ccreatetime);
 					time=term.ccreatetime;
-						//alert(time);
-						tag=1;
-						//alert(tag);
+					tag=1;
 				});
+});
 
-				var len=url.length;
-
-				for(var i=0;i<len;i++){
-
-					//如果是横版的话
-					if(type[i]==2){
-
-						var html="<li style='position:absolute;height:240px;width:340px;top:"+Top+"px;left:-5px'><div class='col-md-4'>";
-								html+="<div class='card card-blog'>"
-								html+="<div class='card-image'>";
-								html+="<a href='#'> <img class='img img-raised' style='height:180px;width:280px' src='"+url[i]+"'> </a>";
-								html+="<div class='ripple-cont'></div>";
-								html+="</div>";
-								html+="<div class='table'>";
-								html+="<div style='height:20px;overflow:hidden'><a style='font-size:2px'>"+name[i]+"</a></div>";
-								html+="</div>";
-								html+="</div>";
-								html+="</div></li>";
-								$("#uli").append(html);
-								ulh+=250;
-								$("#uli").height(ulh);
-								Top+=250;
-						}
-						//如果是竖版
-						if(type[i]==1){
-							//如果栈里没有元素就压栈
-							if(ttop==0){
-									//alert(ttop);
-								Purl[++ttop]=url[i];
-								Pname[ttop]=name[i];
-								Ptitle[ttop]=title[i];
-								Ptype[ttop]=type[i];
-								Pcontent[ttop]=content[i];
-								Pcreatetime[ttop]=createtime[i];
-							}
-							//否则，就和栈里的元素一起出栈，排成一排
-							else{
-								//alert(top);
-
-								var html="<li  style='position:absolute;height:240px;width:180px;top:"+Top+"px;left:-5px'><div class='col-md-4' >";
-										html+="<div class='card card-blog'>";
-										html+="<div class='card-image'>";
-										html+="<a href='#'> <img class='img img-raised'  style='height:180px;width:140px' src='"+Purl[ttop]+"'> </a>";
-										html+="<div class='ripple-cont'></div>";
-										html+="</div>";
-										html+="<div class='table'>";
-										html+="<div style='height:20px;overflow:hidden'><a style='font-size:6px !important;}'>"+Pname[ttop]+"</a><br/>";
-										html+="<a style='font-size:4px !important;>"+Ptitle[ttop]+"</a><br/><a style='font-size:2px !important;>"+Pcontent[ttop]+"</div>";
-										html+="</div>";
-										html+="</div>";
-										html+="</div></li>";
-											$("#uli").append(html);
-										ttop--;
-
-										var html="<li style='position:absolute;height:240px;width:180px;top:"+Top+"px;left:155px'><div class='col-md-4'>";
-												html+="<div class='card card-blog'>"
-												html+="<div class='card-image'>";
-												html+="<a href='#'> <img class='img img-raised' style='height:180px;width:140px' src='"+url[i]+"'> </a>";
-												html+="<div class='ripple-cont'></div>";
-												html+="</div>";
-												html+="<div class='table'>";
-												html+="<div style='height:20px;overflow:hidden'><a style='font-size:2px'>"+name[i]+"</a></div>";
-												html+="</div>";
-												html+="</div>";
-												html+="</div></li>";
-										$("#uli").append(html);
-
-										ulh+=250;
-										$("#uli").height(ulh);
-										Top+=250;
-									}
-						}
-				}
-
-
-
-			});
 			//如果有某个时间点不能正常获取数据，就跳过这一天
 			setTimeout(function(){
 				//alert(tag);
 				if(tag==0){
-
-
 				var time2=time.split(" ");
 				var time3=time2[0].split("-");
 				time3[2]=time3[2]-1;
 				time=time3[0]+"-"+time3[1]+"-"+time3[2]+" "+time2[1];
+				loadData();
 				//alert(time);
 			}
-
 		},1000);
-
-		}
-
-
+}
 
 
 window.onload=function(){
-	//$("#mess").hide();
-	loadData();
+
+	//alert(time);
+	$.getJSON("http://bc.runbros.com/api/card/getCard.php?time="+time,function(data){
+			//初始化
+			 url=[];nname=[];title=[];
+			 type=[];content=[];createtime=[];
+
+				$.each(data.card,function(i,term){
+					//alert(term.cimg);
+					url.push(term.cimg);
+					nname.push(term.cname);
+					title.push(term.ctitle);
+					type.push(term.ccardtype);
+					content.push(term.ccontent);
+					createtime.push(term.ccreatetime);
+					time=term.ccreatetime;
+					//alert(time);
+					tag=1;
+			});
+
+			layout();
+
+		});
+
+		setTimeout(function(){
+			url=[];nname=[];title=[];
+			type=[];content=[];createtime=[];
+		},1000);
+
 }
-window.onresize = function(){
-	//loadData();
-}
+
 refresher.init({
 	id:"wrapper",//<------------------------------------------------------------------------------------┐
 	pullDownAction:Refresh,
 	pullUpAction:Load
 	});
 
-var generatedCount = 0;
 function Refresh() {
+
 	setTimeout(function () {	// <-- Simulate network congestion, remove setTimeout from production!
 		 loadData();
-		wrapper.refresh();/****remember to refresh after  action completed！ ---yourId.refresh(); ----| ****/
-
-	}, 500);
-
+		/****remember to refresh after  action completed！ ---yourId.refresh(); ----| ****/
+	}, 1000);
+	layout();
+	wrapper.refresh();
 }
 
 function Load() {
 
 	setTimeout(function () {// <-- Simulate network congestion, remove setTimeout from production!
 		loadData();
-		wrapper.refresh();/****rem写ember to refresh after action completed！！！   ---id.refresh(); --- ****/
-	}, 500);
+		/****rem写ember to refresh after action completed！！！   ---id.refresh(); --- ****/
+	}, 1000);
+	layout();
+	wrapper.refresh();
 }
 </script>
 
