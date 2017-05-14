@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -12,13 +12,7 @@
 <script src="js/colorful.js"></script>
 <script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
 
-<!-- Font Awesome -->
-
-<!-- Bootstrap -->
-<link rel="stylesheet" href="css/bootstrap.min.css" type="text/css" />
-<!-- Page style -->
-
-<!-- Cards style -->
+<!--自己导入的样式，css-->
 <link rel="stylesheet" href="css/cards-style.css" type="text/css" />
 
 <style type="text/css" media="all">
@@ -26,11 +20,13 @@ body, html {
 	padding: 0;
 	margin: 0;
 	height: 100%;
-	font-family: Arial, Microsoft YaHei;
-	color: #111;
+
 }
 a{
 	font-size:2px;
+}
+hr{
+  height:2px;
 }
 
 </style>
@@ -45,6 +41,15 @@ a{
 <script>
 
 
+//GetJson请求数据异常处理函数
+$.ajaxSetup({
+           error:function(x,e){
+               alert("出错啦，稍后刷新重试");
+               return false;
+           }
+       });
+
+//获取当前时间的函数，转换为年月日格式
 function utcToDate(utcCurrTime) {
             utcCurrTime = utcCurrTime + "";
             var date = "";
@@ -77,25 +82,53 @@ function utcToDate(utcCurrTime) {
 
 var Top=55;//全局变量
 var myDate=new Date();//全局变量时间
-var time=utcToDate(myDate);//全局变量
+var time=utcToDate(myDate);//当天的时间（年-月-日）
 var ulh=0;//ul的高度
 
-var Purl=[];//遗留的视频图片
+
+//不同手机分辨率
+var Pwidth=($(window).width());//当前手机屏幕的宽度
+
+var side=1.0*Pwidth/16;//两边的边距
+var mide=1.0*Pwidth/18;//中间的边距
+var hide=1.0*Pwidth/14;//上下的间距
+
+
+var pwidth=(Pwidth-side-side-mide)/2;//小版图片的宽度
+var pheight=(1.0*pwidth/7)*10;//小版图片的长宽比满足 10：7
+
+
+var swidth=(Pwidth-side-side);//横版图片的宽度
+var sheight=(1.0*swidth/14)*9;//横版图片的长宽比满足 9：14
+
+var lleft=pwidth+side+mide;//小版右侧的left
+
+var cheight=1.0*pheight/3;//文字介绍的高度为图片高度的三分之一
+
+var Pheight=sheight+cheight;//一个li的高度
+
+
+
+//用辅助的缓存是达到，你给我的数据，有横版，我就加载横版，没有横版就布局竖版，不是严格的4块小的，一块大的，我觉得这样也是可行的。布局和四小一大差不多，取决于后台传的数据
+//辅助的缓存最多只存一个，长度最长就是一。而真正储存的缓存，加载一次请求得到的所有数据，也不会太大，每次布局完都会清空。所以不会有内部缓存的累积。
+
+var Purl=[];//辅助的缓存
 var Pname=[];
 var Ptitle=[];
 var Ptype=[];
 var Pcontent=[];
 var Pcreatetime=[];
 
+var ttop=0;//指针
 
-var url=[];//小版的视频图片
+
+var url=[];//类似于缓存，储存请求得来的视频图片
 var nname=[];
 var title=[];
 var type=[];
 var content=[];
 var createtime=[];
 
-var ttop=0;//指针
 
 //布局函数
 function layout(){
@@ -104,21 +137,17 @@ function layout(){
 	for(var i=0;i<len;i++){
 		//如果是横版的话
 		if(type[i]==2){
-			var html="<li style='position:absolute;height:240px;width:340px;top:"+Top+"px;left:-5px'><div class='col-md-4'>";
-					html+="<div class='card card-blog'>"
+			var html="<li style='position:absolute;height:"+Pheight+"px;width:"+swidth+"px;top:"+Top+"px;left:"+side+"px'>"
 					html+="<div class='card-image'>";
-					html+="<a href='#'> <img class='img img-raised' style='height:180px;width:280px' src='"+url[i]+"'> </a>";
-					html+="<div class='ripple-cont'></div>";
+					html+="<a href='#'> <img class='img img-raised' style='height:"+sheight+"px;width:"+swidth+"px' src='"+url[i]+"'></a>";
 					html+="</div>";
-					html+="<div class='table'>";
-					html+="<div style='height:20px;overflow:hidden'><a style='font-size:2px'>"+nname[i]+"</a></div>";
-					html+="</div>";
-					html+="</div>";
+					html+="<div style='height:"+cheight+"px;overflow:hidden'><a style='font-size:4px'>"+nname[i]+"</a><br/>";
+          html+="<a style='font-size:2px !important;>"+title[ttop]+"</a><br/><a style='font-size:2px !important;>"+content[ttop]+"</div>";
 					html+="</div></li>";
 					$("#uli").append(html);
-					ulh+=245;
+					ulh+=Pheight+hide;
 					$("#uli").height(ulh);
-					Top+=245;
+					Top+=Pheight+hide;
 			}
 			//如果是竖版
 			if(type[i]==1){
@@ -135,42 +164,36 @@ function layout(){
 				//否则，就和栈里的元素一起出栈，排成一排
 				else{
 
-					var html="<li  style='position:absolute;height:240px;width:180px;top:"+Top+"px;left:-5px'><div class='col-md-4' >";
-							html+="<div class='card card-blog'>";
+					var html="<li  style='position:absolute;height:"+Pheight+"px;width:"+pwidth+"px;top:"+Top+"px;left:"+side+"px'>";
 							html+="<div class='card-image'>";
-							html+="<a href='#'> <img class='img img-raised'  style='height:180px;width:140px' src='"+Purl[ttop]+"'> </a>";
-							html+="<div class='ripple-cont'></div>";
+							html+="<a href='#'> <img class='img img-raised'  style='height:"+pheight+"px;width:"+pwidth+"px' src='"+Purl[ttop]+"'></a>";
 							html+="</div>";
-							html+="<div class='table'>";
-							html+="<div style='height:20px;overflow:hidden'><a style='font-size:6px !important;}'>"+Pname[ttop]+"</a><br/>";
-							html+="<a style='font-size:4px !important;>"+Ptitle[ttop]+"</a><br/><a style='font-size:2px !important;>"+Pcontent[ttop]+"</div>";
-							html+="</div>";
-							html+="</div>";
+							html+="<div style='height:"+cheight+"px;overflow:hidden'><a style='font-size:4px !important;}'>"+Pname[ttop]+"</a><br/>";
+							html+="<a style='font-size:2px !important;>"+Ptitle[ttop]+"</a><br/><a style='font-size:2px !important;>"+Pcontent[ttop]+"</div>";
 							html+="</div></li>";
-								$("#uli").append(html);
+							$("#uli").append(html);
 							ttop--;
 
-							var html="<li style='position:absolute;height:240px;width:180px;top:"+Top+"px;left:155px'><div class='col-md-4'>";
-									html+="<div class='card card-blog'>"
+							var html="<li style='position:absolute;height:"+Pheight+"px;width:"+pwidth+"px;top:"+Top+"px;left:"+lleft+"px'>"
 									html+="<div class='card-image'>";
-									html+="<a href='#'> <img class='img img-raised' style='height:180px;width:140px' src='"+url[i]+"'> </a>";
-									html+="<div class='ripple-cont'></div>";
+									html+="<a href='#'> <img class='img img-raised' style='height:"+pheight+"px;width:"+pwidth+"px' src='"+url[i]+"'></a>";
 									html+="</div>";
-									html+="<div class='table'>";
-									html+="<div style='height:20px;overflow:hidden'><a style='font-size:2px'>"+nname[i]+"</a></div>";
-									html+="</div>";
-									html+="</div>";
+									html+="<div style='height:"+cheight+"px;overflow:hidden'><a style='font-size:4px'>"+nname[i]+"</a><br/>";
+                  html+="<a style='font-size:2px !important;>"+title[i]+"</a><br/><a style='font-size:2px !important;>"+content[i]+"</div>";
 									html+="</div></li>";
 							$("#uli").append(html);
-							ulh+=245;
+							ulh+=Pheight+hide;
 							$("#uli").height(ulh);
-							Top+=245;
+							Top+=Pheight+hide;
 						}
 			}
 	}
+  	$("#uli").height(ulh+20);
 }
+
+//加载数据的函数
 function loadData(){
-	var tag=0;
+	var tag=0;//判断能否请求到数据。
 	$.getJSON("http://bc.runbros.com/api/card/getCard.php?time="+time,function(data){
 			//初始化
 			 url=[];nname=[];title=[];
@@ -187,9 +210,10 @@ function loadData(){
 					time=term.ccreatetime;
 					tag=1;
 				});
+
 });
 
-			//如果有某个时间点不能正常获取数据，就跳过这一天
+			//如果有某个时间点不能正常获取数据，就推到下一天,（这里我觉得还要改进，可以等后面再改）
 			setTimeout(function(){
 				//alert(tag);
 				if(tag==0){
@@ -200,13 +224,17 @@ function loadData(){
 				loadData();
 				//alert(time);
 			}
-		},1000);
+		},2000);
 }
 
-
+//刚进页面的加载函数
 window.onload=function(){
 
-	//alert(time);
+var x=$(window).height();
+var y=$(window).width();
+$("#wrapper").height(x);
+$("#wrapper").width(y);
+//加载的时候请求一次数据，并显示出来。
 	$.getJSON("http://bc.runbros.com/api/card/getCard.php?time="+time,function(data){
 			//初始化
 			 url=[];nname=[];title=[];
@@ -227,12 +255,12 @@ window.onload=function(){
 
 			layout();
 
+      url=[];nname=[];title=[];
+			type=[];content=[];createtime=[];
+
 		});
 
-		setTimeout(function(){
-			url=[];nname=[];title=[];
-			type=[];content=[];createtime=[];
-		},1000);
+
 
 }
 
@@ -242,22 +270,23 @@ refresher.init({
 	pullUpAction:Load
 	});
 
+//下拉操作
 function Refresh() {
 
 	setTimeout(function () {	// <-- Simulate network congestion, remove setTimeout from production!
 		 loadData();
 		/****remember to refresh after  action completed！ ---yourId.refresh(); ----| ****/
-	}, 1000);
+	}, 500);
 	layout();
 	wrapper.refresh();
 }
-
+//上滑操作
 function Load() {
 
 	setTimeout(function () {// <-- Simulate network congestion, remove setTimeout from production!
 		loadData();
 		/****rem写ember to refresh after action completed！！！   ---id.refresh(); --- ****/
-	}, 1000);
+	}, 500);
 	layout();
 	wrapper.refresh();
 }
