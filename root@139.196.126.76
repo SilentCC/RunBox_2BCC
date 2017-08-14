@@ -66,18 +66,13 @@ img{
       echo "aaaa";
 
     };
-
-		if($_POST["do"]=="yes"){
-			show();
-		}
  ?>
 <script>
 
 
 function jump(){
 
-		alert("ok");
-   //document.location.herf="?do=yes";
+  <?php show();?>
 }
 //图标小数组
 var icon=['','movie','drama','record','cartoon','life','sports','news','music','game','happy','variety'];
